@@ -1,0 +1,48 @@
+﻿version: '3.8'
+
+services:
+  backtelega:
+    build: .
+    container_name: backtelega_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Username=postgres;Password=12345;Database=clontelegram
+      - Redis__Host=redis
+    networks:
+      - backtelega_network
+
+  postgres:
+    image: postgres:15
+    container_name: backtelega_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: clontelegram
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backtelega_network
+
+  redis:
+    image: redis:latest
+    container_name: backtelega_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - backtelega_network
+
+networks:
+  backtelega_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
